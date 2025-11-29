@@ -7,6 +7,7 @@ import { setCurrentList } from "~/store/list";
 import { fetchTasks, updateTask, deleteTask } from "~/store/task";
 import { useId } from "~/hooks/useId";
 import { AppButton } from "~/components/common/AppButton";
+import { AppInput } from "~/components/common/AppInput";
 
 const EditTask = () => {
   const id = useId();
@@ -90,9 +91,8 @@ const EditTask = () => {
           <label htmlFor={`${id}-title`} className="edit_list__form_label">
             Title
           </label>
-          <input
+          <AppInput
             id={`${id}-title`}
-            className="app_input"
             placeholder="Buy some milk"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
