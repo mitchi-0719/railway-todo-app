@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import "./TaskCreateForm.css";
 import { CheckIcon } from "~/icons/CheckIcon";
 import { createTask } from "~/store/task";
+import { AppButton } from "./common/AppButton";
 
 export const TaskCreateForm = () => {
   const dispatch = useDispatch();
@@ -138,25 +139,23 @@ export const TaskCreateForm = () => {
             disabled={formState === "submitting"}
           />
           <div className="task_create_form__actions">
-            <button
+            <AppButton
               type="button"
-              className="app_button"
               data-variant="secondary"
               onBlur={handleBlur}
               onClick={handleDiscard}
               disabled={(!title && !detail) || formState === "submitting"}
             >
               Discard
-            </button>
+            </AppButton>
             <div className="task_create_form__spacer"></div>
-            <button
+            <AppButton
               type="submit"
-              className="app_button"
               onBlur={handleBlur}
               disabled={!title || !detail || formState === "submitting"}
             >
               Add
-            </button>
+            </AppButton>
           </div>
         </div>
       )}
