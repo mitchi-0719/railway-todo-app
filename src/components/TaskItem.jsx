@@ -5,12 +5,13 @@ import { PencilIcon } from "~/icons/PencilIcon";
 import { CheckIcon } from "~/icons/CheckIcon";
 import { updateTask } from "~/store/task";
 import "./TaskItem.css";
+import { useMemo } from "react";
 
 export const TaskItem = ({ task }) => {
   const dispatch = useDispatch();
 
   const { listId } = useParams();
-  const { id, title, detail, done } = task;
+  const { id, title, detail, limit, done } = task;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,6 +21,16 @@ export const TaskItem = ({ task }) => {
       setIsSubmitting(false);
     });
   }, [id, done]);
+
+  const leftLimitDays = useMemo(() => {
+    if (!limit) {
+      return null;
+    }
+    return Math.floor(
+      (new Date(limit).getTime() - new Date().getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+  }, [limit]);
 
   return (
     <div className="task_item">
@@ -53,6 +64,26 @@ export const TaskItem = ({ task }) => {
         </Link>
       </div>
       <div className="task_item__detail">{detail}</div>
+      {limit && (
+        <>
+          <div className="task_item__limit">
+            Due:{" "}
+            {new Date(limit).toLocaleString(undefined, {
+              timeZone: "Asia/Tokyo",
+              year: "numeric",
+              month: "short",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </div>
+          <div
+            className={`task_item__limit task_item__limit_left ${leftLimitDays < 0 ? "task_item__limit_left_overdue" : ""}`}
+          >
+            {leftLimitDays >= 0 ? `Due in ${leftLimitDays} days` : "Overdue"}
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -6,6 +6,10 @@ import "./index.css";
 import { setCurrentList } from "~/store/list";
 import { fetchTasks, updateTask, deleteTask } from "~/store/task";
 import { useId } from "~/hooks/useId";
+import {
+  isoToTokyoDatetimeLocal,
+  tokyoDatetimeLocalToISOString,
+} from "~/utils/datetime";
 import { AppButton } from "~/components/common/AppButton";
 import { AppInput } from "~/components/common/AppInput";
 
@@ -18,6 +22,7 @@ const EditTask = () => {
 
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
+  const [limit, setLimit] = useState("");
   const [done, setDone] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,6 +36,9 @@ const EditTask = () => {
     if (task) {
       setTitle(task.title);
       setDetail(task.detail);
+      setLimit(
+        task.limit ? isoToTokyoDatetimeLocal(task.limit).slice(0, 16) : "",
+      );
       setDone(task.done);
     }
   }, [task]);
@@ -46,7 +54,11 @@ const EditTask = () => {
 
       setIsSubmitting(true);
 
-      void dispatch(updateTask({ id: taskId, title, detail, done }))
+      const payloadLimit = limit ? tokyoDatetimeLocalToISOString(limit) : null;
+
+      void dispatch(
+        updateTask({ id: taskId, title, detail, done, limit: payloadLimit }),
+      )
         .unwrap()
         .then(() => {
           history.push(`/lists/${listId}`);
@@ -58,7 +70,7 @@ const EditTask = () => {
           setIsSubmitting(false);
         });
     },
-    [title, taskId, listId, detail, done],
+    [title, taskId, listId, detail, done, limit],
   );
 
   const handleDelete = useCallback(() => {
@@ -108,6 +120,18 @@ const EditTask = () => {
             placeholder="Blah blah blah"
             value={detail}
             onChange={(event) => setDetail(event.target.value)}
+          />
+        </fieldset>
+        <fieldset className="edit_list__form_field">
+          <label htmlFor={`${id}-limit`} className="edit_list__form_label">
+            Limit
+          </label>
+          <input
+            id={`${id}-limit`}
+            type="datetime-local"
+            className="task_create_form__limit"
+            value={limit}
+            onChange={(e) => setLimit(e.target.value)}
           />
         </fieldset>
         <fieldset className="edit_list__form_field">

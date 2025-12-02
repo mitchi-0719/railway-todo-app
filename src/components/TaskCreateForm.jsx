@@ -3,6 +3,10 @@ import { useDispatch } from "react-redux";
 import "./TaskCreateForm.css";
 import { CheckIcon } from "~/icons/CheckIcon";
 import { createTask } from "~/store/task";
+import {
+  tokyoDatetimeLocalToISOString,
+  tokyoNowDatetimeLocal,
+} from "~/utils/datetime";
 import { AppButton } from "./common/AppButton";
 
 export const TaskCreateForm = () => {
@@ -16,6 +20,9 @@ export const TaskCreateForm = () => {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [done, setDone] = useState(false);
+  const [limit, setLimit] = useState("");
+
+  const getTokyoDatetimeLocalNow = () => tokyoNowDatetimeLocal();
 
   const handleToggle = useCallback(() => {
     setDone((prev) => !prev);
@@ -26,7 +33,7 @@ export const TaskCreateForm = () => {
   }, []);
 
   const handleBlur = useCallback(() => {
-    if (title || detail) {
+    if (title || detail || limit) {
       return;
     }
 
@@ -40,11 +47,12 @@ export const TaskCreateForm = () => {
       setFormState("initial");
       setDone(false);
     }, 100);
-  }, [title, detail]);
+  }, [title, detail, limit]);
 
   const handleDiscard = useCallback(() => {
     setTitle("");
     setDetail("");
+    setLimit("");
     setFormState("initial");
     setDone(false);
   }, []);
@@ -55,7 +63,10 @@ export const TaskCreateForm = () => {
 
       setFormState("submitting");
 
-      void dispatch(createTask({ title, detail, done }))
+      // Interpret `limit` as JST datetime-local string and convert to ISO (UTC)
+      const payloadLimit = limit ? tokyoDatetimeLocalToISOString(limit) : null;
+
+      void dispatch(createTask({ title, detail, done, limit: payloadLimit }))
         .unwrap()
         .then(() => {
           handleDiscard();
@@ -65,7 +76,7 @@ export const TaskCreateForm = () => {
           setFormState("focused");
         });
     },
-    [title, detail, done],
+    [title, detail, done, limit],
   );
 
   useEffect(() => {
@@ -138,13 +149,27 @@ export const TaskCreateForm = () => {
             onBlur={handleBlur}
             disabled={formState === "submitting"}
           />
+          <div>
+            <input
+              type="datetime-local"
+              min={getTokyoDatetimeLocalNow()}
+              max={"9999-12-31T23:59"}
+              className="task_create_form__limit"
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              onBlur={handleBlur}
+              disabled={formState === "submitting"}
+            />
+          </div>
           <div className="task_create_form__actions">
             <AppButton
               type="button"
               data-variant="secondary"
               onBlur={handleBlur}
               onClick={handleDiscard}
-              disabled={(!title && !detail) || formState === "submitting"}
+              disabled={
+                (!title && !detail && !limit) || formState === "submitting"
+              }
             >
               Discard
             </AppButton>
